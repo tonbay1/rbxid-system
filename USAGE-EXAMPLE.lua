@@ -1,16 +1,32 @@
--- RbxID Telemetry System - Usage Example
--- Copy this code and give to your users
+-- RbxID Telemetry System - Usage Examples
+-- Copy and paste these scripts for different machines
 
--- Step 1: Configure your settings
+-- Example 1: PC Main
 getgenv().Shop888_Settings = {
-    ['key'] = 'YOUR-API-KEY-HERE',  -- Get from dashboard
-    ['PC'] = 'CHANGE-ME',           -- Your PC/User name
+    ['key'] = 'ce0b1015-36b0-4849-a173-fc816644101c',
+    ['PC'] = 'PC-Main',
 }
 
--- Step 2: Load the telemetry system
-task.spawn(function() 
-    loadstring(game:HttpGet('https://raw.githubusercontent.com/tonbay1/rbxid-system/main/client/rbxid_loader.lua'))() 
-end)
+
+loadstring(game:HttpGet('https://raw.githubusercontent.com/tonbay1/rbxid-system/main/client/rbxid_loader.lua'))()
+
+-- Example 2: Laptop Gaming
+getgenv().Shop888_Settings = {
+    ['key'] = 'a1b2c3d4-5678-9012-3456-789012345678',
+    ['PC'] = 'Laptop-Gaming',
+}
+
+
+loadstring(game:HttpGet('https://raw.githubusercontent.com/tonbay1/rbxid-system/main/client/rbxid_loader.lua'))()
+
+-- Example 3: PC Backup
+getgenv().Shop888_Settings = {
+    ['key'] = 'x9y8z7w6-5432-1098-7654-321098765432',
+    ['PC'] = 'PC-Backup',
+}
+
+
+loadstring(game:HttpGet('https://raw.githubusercontent.com/tonbay1/rbxid-system/main/client/rbxid_loader.lua'))()
 
 --[[
 INSTRUCTIONS FOR USERS:

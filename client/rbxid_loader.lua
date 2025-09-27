@@ -5,8 +5,16 @@
 local GEN = (typeof(getgenv) == "function" and getgenv()) or {}
 local CFG = GEN.Shop888_Settings or GEN.SHOP888_Settings or GEN.RbxID_Settings or {}
 
+-- Debug configuration
+print("🔍 RbxID: Checking configuration...")
+print("🔍 RbxID: getgenv exists:", typeof(getgenv) == "function")
+print("🔍 RbxID: Shop888_Settings:", CFG)
+print("🔍 RbxID: API Key:", CFG.key and (string.sub(CFG.key, 1, 8) .. "...") or "NOT SET")
+print("🔍 RbxID: PC Name:", CFG.PC or "NOT SET")
+
 -- Validate configuration
 if not CFG.key or CFG.key == "" or CFG.key == "YOUR-API-KEY-HERE" then
+    warn("❌ RbxID: No key provided in settings")
     warn("❌ RbxID: Please set your API key in Shop888_Settings.key")
     return
 end

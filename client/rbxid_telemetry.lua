@@ -8,13 +8,14 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 -- Read external config from getgenv (executor pattern)
 local GEN = (typeof(getgenv) == "function" and getgenv()) or nil
-local CFG = (GEN and (GEN.Fishis_Telemetry or GEN.Telemetry_Settings or GEN.SHOP888 or GEN.SHOP888_Settings or GEN.Hermanos_Settings)) or {}
+local CFG = (GEN and (GEN.Shop888_Settings or GEN.SHOP888_Settings or GEN.Fishis_Telemetry or GEN.Telemetry_Settings or GEN.SHOP888 or GEN.Hermanos_Settings)) or {}
 
 -- RbxID Configuration
 local TELEMETRY_URLS = {
     "https://rbxid.com/api/telemetry",
-    "http://127.0.0.1:3010/api/telemetry",
-    "http://localhost:3010/api/telemetry",
+    "http://rbxid.com:8888/api/telemetry",
+    "http://127.0.0.1:8888/api/telemetry",
+    "http://localhost:8888/api/telemetry",
 }
 
 -- Add custom API base if provided

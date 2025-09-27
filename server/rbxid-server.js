@@ -5,7 +5,7 @@ const path = require('path');
 const crypto = require('crypto');
 const url = require('url');
 
-const PORT = process.env.PORT || 3010;
+const PORT = 8888; // Force port 8888, ignore environment variables
 const DOMAIN = process.env.DOMAIN || 'rbxid.com';
 const DATA_DIR = path.join(__dirname, 'rbxid_data');
 const KEYS_FILE = path.join(__dirname, 'rbxid_keys.json');
@@ -224,6 +224,62 @@ const server = http.createServer((req, res) => {
     console.log(`📡 ${req.method} ${pathname}`);
     
     // ========================================================================
+    // TELEMETRY DATA ENDPOINT
+    // ========================================================================
+    if (pathname === '/api/telemetry' && req.method === 'POST') {
+        let body = '';
+        req.on('data', chunk => {
+            body += chunk.toString();
+        });
+        
+        req.on('end', () => {
+            try {
+                const data = JSON.parse(body);
+                const apiKey = data.key || data.apiKey || data.API_KEY;
+                
+                console.log('📡 Telemetry received:', {
+                    key: apiKey ? (apiKey.substring(0, 8) + '...') : 'MISSING',
+                    pc: data.PC || data.pcName || 'Unknown',
+                    player: data.playerName || 'Unknown'
+                });
+                
+                if (!apiKey) {
+                    res.writeHead(400, { 'Content-Type': 'application/json' });
+                    res.end(JSON.stringify({ success: false, error: 'API key required' }));
+                    return;
+                }
+                
+                if (!isValidKey(apiKey)) {
+                    res.writeHead(401, { 'Content-Type': 'application/json' });
+                    res.end(JSON.stringify({ success: false, error: 'Invalid API key' }));
+                    return;
+                }
+                
+                // Update player data
+                const success = updatePlayerData(apiKey, {
+                    ...data,
+                    timestamp: new Date().toISOString(),
+                    receivedAt: Date.now()
+                });
+                
+                if (success) {
+                    res.writeHead(200, { 'Content-Type': 'application/json' });
+                    res.end(JSON.stringify({ success: true, message: 'Data received' }));
+                } else {
+                    res.writeHead(500, { 'Content-Type': 'application/json' });
+                    res.end(JSON.stringify({ success: false, error: 'Failed to save data' }));
+                }
+                
+            } catch (error) {
+                console.error('❌ Telemetry error:', error);
+                res.writeHead(400, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ success: false, error: 'Invalid JSON' }));
+            }
+        });
+        return;
+    }
+    
+    // ========================================================================
     // SERVE GITHUB RAW URL REDIRECT
     // ========================================================================
     if (pathname === '/script' && req.method === 'GET') {
@@ -358,30 +414,51 @@ const server = http.createServer((req, res) => {
     // KEY MANAGEMENT
     // ========================================================================
     if (pathname === '/api/keys' && req.method === 'POST') {
-        const newKey = generateKey();
-        const keys = readKeys();
+        let body = '';
+        req.on('data', chunk => {
+            body += chunk.toString();
+        });
         
-        const keyRecord = {
-            key: newKey,
-            createdAt: new Date().toISOString(),
-            revoked: false,
-            description: `Key created at ${new Date().toLocaleString()}`
-        };
-        
-        keys.push(keyRecord);
-        
-        if (writeKeys(keys)) {
-            res.writeHead(200, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({
-                success: true,
-                key: newKey,
-                message: 'Key created successfully'
-            }));
-            console.log(`🔑 New key created: ${newKey}`);
-        } else {
-            res.writeHead(500, { 'Content-Type': 'application/json' });
-            res.end(JSON.stringify({ success: false, message: 'Failed to create key' }));
-        }
+        req.on('end', () => {
+            try {
+                const requestData = JSON.parse(body || '{}');
+                const description = requestData.description || `Key created at ${new Date().toLocaleString()}`;
+                const machineName = requestData.machineName || requestData.machine || 'Unknown Machine';
+                
+                const newKey = generateKey();
+                const keys = readKeys();
+                
+                const keyRecord = {
+                    key: newKey,
+                    createdAt: new Date().toISOString(),
+                    revoked: false,
+                    description: description,
+                    machineName: machineName,
+                    lastUsed: null,
+                    totalPlayers: 0
+                };
+                
+                keys.push(keyRecord);
+                
+                if (writeKeys(keys)) {
+                    res.writeHead(200, { 'Content-Type': 'application/json' });
+                    res.end(JSON.stringify({
+                        success: true,
+                        key: newKey,
+                        machineName: machineName,
+                        description: description,
+                        message: 'Key created successfully'
+                    }));
+                    console.log(`🔑 New key created for ${machineName}: ${newKey}`);
+                } else {
+                    res.writeHead(500, { 'Content-Type': 'application/json' });
+                    res.end(JSON.stringify({ error: 'Failed to create key' }));
+                }
+            } catch (error) {
+                res.writeHead(400, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ error: 'Invalid JSON data' }));
+            }
+        });
         return;
     }
     
