@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RbxID - Fisch Telemetry Dashboard</title>
+    <meta name="description" content="Real-time Roblox Fisch game telemetry dashboard">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎮</text></svg>">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <style>
+        /* Custom styles for dark mode */
+        .dark {
+            color-scheme: dark;
+        }
+        
+        /* Loading animation */
+        .loading-spinner {
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid #3498db;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Smooth transitions */
+        * {
+            transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+        }
+        
+        /* Custom scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 4px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-900 dark:bg-gray-900 dark:text-gray-100">
+    <div id="root">
+        <div class="min-h-screen">
+            <!-- Header -->
+            <header class="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div class="flex justify-between items-center py-4">
+                        <div class="flex items-center space-x-3">
+                            <div class="text-2xl">🎮</div>
+                            <div>
+                                <h1 class="text-xl font-bold text-gray-900 dark:text-white">RbxID Dashboard</h1>
+                                <p class="text-sm text-gray-500 dark:text-gray-400">Roblox Fisch Telemetry System</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center space-x-4">
+                            <button id="theme-toggle" class="p-2 rounded-lg bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">
+                                <span class="dark:hidden">🌙</span>
+                                <span class="hidden dark:inline">☀️</span>
+                            </button>
+                            <div class="flex items-center space-x-2">
+                                <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                                <span class="text-sm text-gray-600 dark:text-gray-300">Online</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Main Content -->
+            <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                <!-- Stats Cards -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                    <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6 border border-gray-200 dark:border-gray-700">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Total Players</p>
+                                <p id="total-players" class="text-2xl font-bold text-gray-900 dark:text-white">0</p>
+                            </div>
+                            <div class="w-12 h-12 bg-blue-100 dark:bg-blue-900 rounded-lg flex items-center justify-center">
+                                <span class="text-xl">👥</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6 border border-gray-200 dark:border-gray-700">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Online Players</p>
+                                <p id="online-players" class="text-2xl font-bold text-green-600 dark:text-green-400">0</p>
+                            </div>
+                            <div class="w-12 h-12 bg-green-100 dark:bg-green-900 rounded-lg flex items-center justify-center">
+                                <span class="text-xl">🟢</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6 border border-gray-200 dark:border-gray-700">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-gray-600 dark:text-gray-400">API Keys</p>
+                                <p id="total-keys" class="text-2xl font-bold text-gray-900 dark:text-white">0</p>
+                            </div>
+                            <div class="w-12 h-12 bg-purple-100 dark:bg-purple-900 rounded-lg flex items-center justify-center">
+                                <span class="text-xl">🔑</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white dark:bg-gray-800 rounded-lg shadow p-6 border border-gray-200 dark:border-gray-700">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Last Update</p>
+                                <p id="last-update" class="text-sm font-medium text-gray-900 dark:text-white">Never</p>
+                            </div>
+                            <div class="w-12 h-12 bg-yellow-100 dark:bg-yellow-900 rounded-lg flex items-center justify-center">
+                                <span class="text-xl">⏰</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Key Management -->
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+                    <!-- Create Key -->
+                    <div class="bg-white dark:bg-gray-800 rounded-lg shadow border border-gray-200 dark:border-gray-700">
+                        <div class="p-6">
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">🔑 Create API Key</h3>
+                            <div class="space-y-4">
+                                <button id="create-key-btn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-lg transition-colors">
+                                    Create New Key
+                                </button>
+                                <div id="new-key-display" class="hidden p-4 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                                    <p class="text-sm text-gray-600 dark:text-gray-400 mb-2">New Key Created:</p>
+                                    <div class="flex items-center space-x-2">
+                                        <code id="new-key-value" class="flex-1 text-sm bg-white dark:bg-gray-800 p-2 rounded border font-mono"></code>
+                                        <button id="copy-key-btn" class="px-3 py-2 bg-gray-600 hover:bg-gray-700 text-white text-sm rounded transition-colors">
+                                            Copy
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Usage Instructions -->
+                    <div class="bg-white dark:bg-gray-800 rounded-lg shadow border border-gray-200 dark:border-gray-700">
+                        <div class="p-6">
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white mb-4">📋 Usage Instructions</h3>
+                            <div class="space-y-3 text-sm">
+                                <div class="p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                                    <p class="font-medium text-gray-900 dark:text-white mb-2">1. Create API Key</p>
+                                    <p class="text-gray-600 dark:text-gray-400">Generate a new key for your users</p>
+                                </div>
+                                <div class="p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                                    <p class="font-medium text-gray-900 dark:text-white mb-2">2. Use Script Template</p>
+                                    <div class="bg-gray-900 text-green-400 p-2 rounded text-xs font-mono mt-2">
+getgenv().Shop888_Settings = {<br>
+&nbsp;&nbsp;&nbsp;&nbsp;['key'] = 'YOUR-API-KEY',<br>
+&nbsp;&nbsp;&nbsp;&nbsp;['PC'] = 'CHANGE-ME',<br>
+}<br>
+task.spawn(function() loadstring(game:HttpGet('https://rbxid.com/script'))() end)
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Player Data Table -->
+                <div class="bg-white dark:bg-gray-800 rounded-lg shadow border border-gray-200 dark:border-gray-700">
+                    <div class="p-6">
+                        <div class="flex justify-between items-center mb-6">
+                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">📊 Player Data</h3>
+                            <div class="flex items-center space-x-4">
+                                <select id="key-filter" class="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm">
+                                    <option value="">All Keys</option>
+                                </select>
+                                <button id="refresh-btn" class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white text-sm rounded-lg transition-colors">
+                                    🔄 Refresh
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-sm">
+                                <thead>
+                                    <tr class="border-b border-gray-200 dark:border-gray-700">
+                                        <th class="text-left py-3 px-4 font-medium text-gray-900 dark:text-white">Player</th>
+                                        <th class="text-left py-3 px-4 font-medium text-gray-900 dark:text-white">Level</th>
+                                        <th class="text-left py-3 px-4 font-medium text-gray-900 dark:text-white">Money</th>
+                                        <th class="text-left py-3 px-4 font-medium text-gray-900 dark:text-white">Rod</th>
+                                        <th class="text-left py-3 px-4 font-medium text-gray-900 dark:text-white">Location</th>
+                                        <th class="text-left py-3 px-4 font-medium text-gray-900 dark:text-white">Status</th>
+                                        <th class="text-left py-3 px-4 font-medium text-gray-900 dark:text-white">Last Seen</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="player-table-body">
+                                    <tr>
+                                        <td colspan="7" class="text-center py-8 text-gray-500 dark:text-gray-400">
+                                            <div class="loading-spinner mx-auto mb-2"></div>
+                                            Loading player data...
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script>
+        // Theme management
+        const themeToggle = document.getElementById('theme-toggle');
+        const isDark = localStorage.getItem('theme') === 'dark' || 
+                      (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches);
+        
+        if (isDark) {
+            document.documentElement.classList.add('dark');
+        }
+        
+        themeToggle.addEventListener('click', () => {
+            document.documentElement.classList.toggle('dark');
+            localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
+        });
+
+        // API functions
+        const API_BASE = window.location.origin;
+        
+        async function createKey() {
+            try {
+                const response = await fetch(`${API_BASE}/api/keys`, { method: 'POST' });
+                const data = await response.json();
+                if (data.success) {
+                    document.getElementById('new-key-value').textContent = data.key;
+                    document.getElementById('new-key-display').classList.remove('hidden');
+                    loadKeys();
+                } else {
+                    alert('Failed to create key: ' + data.message);
+                }
+            } catch (error) {
+                alert('Error creating key: ' + error.message);
+            }
+        }
+        
+        async function loadKeys() {
+            try {
+                const response = await fetch(`${API_BASE}/api/keys`);
+                const data = await response.json();
+                if (data.success) {
+                    document.getElementById('total-keys').textContent = data.keys.length;
+                    
+                    const keyFilter = document.getElementById('key-filter');
+                    keyFilter.innerHTML = '<option value="">All Keys</option>';
+                    data.keys.forEach(key => {
+                        const option = document.createElement('option');
+                        option.value = key.key;
+                        option.textContent = `${key.key.substring(0, 8)}... (${new Date(key.createdAt).toLocaleDateString()})`;
+                        keyFilter.appendChild(option);
+                    });
+                }
+            } catch (error) {
+                console.error('Error loading keys:', error);
+            }
+        }
+        
+        async function loadPlayerData(keyFilter = '') {
+            try {
+                const keys = await fetch(`${API_BASE}/api/keys`).then(r => r.json());
+                if (!keys.success) return;
+                
+                let allPlayers = [];
+                let totalOnline = 0;
+                
+                for (const keyInfo of keys.keys) {
+                    if (keyFilter && keyInfo.key !== keyFilter) continue;
+                    
+                    try {
+                        const response = await fetch(`${API_BASE}/api/data?key=${keyInfo.key}`);
+                        const data = await response.json();
+                        if (data.success && data.data) {
+                            data.data.forEach(player => {
+                                player.keyInfo = keyInfo;
+                                if (player.online) totalOnline++;
+                            });
+                            allPlayers = allPlayers.concat(data.data);
+                        }
+                    } catch (error) {
+                        console.error(`Error loading data for key ${keyInfo.key}:`, error);
+                    }
+                }
+                
+                // Update stats
+                document.getElementById('total-players').textContent = allPlayers.length;
+                document.getElementById('online-players').textContent = totalOnline;
+                document.getElementById('last-update').textContent = new Date().toLocaleTimeString();
+                
+                // Update table
+                const tbody = document.getElementById('player-table-body');
+                if (allPlayers.length === 0) {
+                    tbody.innerHTML = `
+                        <tr>
+                            <td colspan="7" class="text-center py-8 text-gray-500 dark:text-gray-400">
+                                No player data available
+                            </td>
+                        </tr>
+                    `;
+                } else {
+                    tbody.innerHTML = allPlayers.map(player => `
+                        <tr class="border-b border-gray-100 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700">
+                            <td class="py-3 px-4">
+                                <div class="font-medium text-gray-900 dark:text-white">${player.playerName || player.account}</div>
+                                <div class="text-xs text-gray-500 dark:text-gray-400">Key: ${player.keyInfo.key.substring(0, 8)}...</div>
+                            </td>
+                            <td class="py-3 px-4 text-gray-900 dark:text-white">${player.level || 0}</td>
+                            <td class="py-3 px-4 text-gray-900 dark:text-white">${(player.money || player.coins || 0).toLocaleString()}</td>
+                            <td class="py-3 px-4 text-gray-900 dark:text-white">${player.equippedRod || 'None'}</td>
+                            <td class="py-3 px-4 text-gray-900 dark:text-white">${player.location || 'Unknown'}</td>
+                            <td class="py-3 px-4">
+                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                                    player.online 
+                                        ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200' 
+                                        : 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200'
+                                }">
+                                    ${player.online ? '🟢 Online' : '🔴 Offline'}
+                                </span>
+                            </td>
+                            <td class="py-3 px-4 text-gray-900 dark:text-white">
+                                ${player.timestamp ? new Date(player.timestamp).toLocaleString() : 'Never'}
+                            </td>
+                        </tr>
+                    `).join('');
+                }
+            } catch (error) {
+                console.error('Error loading player data:', error);
+                document.getElementById('player-table-body').innerHTML = `
+                    <tr>
+                        <td colspan="7" class="text-center py-8 text-red-500">
+                            Error loading data: ${error.message}
+                        </td>
+                    </tr>
+                `;
+            }
+        }
+        
+        // Event listeners
+        document.getElementById('create-key-btn').addEventListener('click', createKey);
+        document.getElementById('copy-key-btn').addEventListener('click', () => {
+            const keyValue = document.getElementById('new-key-value').textContent;
+            navigator.clipboard.writeText(keyValue).then(() => {
+                alert('Key copied to clipboard!');
+            });
+        });
+        document.getElementById('refresh-btn').addEventListener('click', () => {
+            const keyFilter = document.getElementById('key-filter').value;
+            loadPlayerData(keyFilter);
+        });
+        document.getElementById('key-filter').addEventListener('change', (e) => {
+            loadPlayerData(e.target.value);
+        });
+        
+        // Initial load
+        loadKeys();
+        loadPlayerData();
+        
+        // Auto refresh every 30 seconds
+        setInterval(() => {
+            const keyFilter = document.getElementById('key-filter').value;
+            loadPlayerData(keyFilter);
+        }, 30000);
+    </script>
+</body>
+</html>

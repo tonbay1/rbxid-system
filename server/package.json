@@ -1,0 +1,25 @@
+{
+  "name": "rbxid-server",
+  "version": "1.0.0",
+  "description": "RbxID Telemetry Server for Roblox Fisch Game Data",
+  "main": "rbxid-server.js",
+  "scripts": {
+    "start": "node rbxid-server.js",
+    "dev": "node rbxid-server.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "roblox",
+    "telemetry",
+    "fisch",
+    "api",
+    "rbxid"
+  ],
+  "author": "RbxID Team",
+  "license": "MIT",
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "dependencies": {},
+  "devDependencies": {}
+}
