@@ -5,7 +5,7 @@ const path = require('path');
 const crypto = require('crypto');
 const url = require('url');
 
-const PORT = 8888; // Force port 8888, ignore environment variables
+const PORT = process.env.PORT || 80; // Use environment PORT or default to 80 for public access
 const DOMAIN = process.env.DOMAIN || 'rbxid.com';
 const DATA_DIR = path.join(__dirname, 'rbxid_data');
 const KEYS_FILE = path.join(__dirname, 'rbxid_keys.json');
@@ -520,50 +520,86 @@ const server = http.createServer((req, res) => {
     }
     
     // ========================================================================
-    // SERVE STATIC FILES
+    // SERVE REACT DASHBOARD
     // ========================================================================
     if (pathname === '/' && req.method === 'GET') {
         try {
-            const htmlPath = path.join(__dirname, '..', 'web', 'index.html');
-            if (fs.existsSync(htmlPath)) {
-                const content = fs.readFileSync(htmlPath, 'utf8');
+            // Try to serve React build first
+            const reactIndexPath = path.join(__dirname, '..', 'ui-react', 'dist', 'index.html');
+            if (fs.existsSync(reactIndexPath)) {
+                const content = fs.readFileSync(reactIndexPath, 'utf8');
                 res.writeHead(200, { 'Content-Type': 'text/html' });
                 res.end(content);
-            } else {
-                res.writeHead(200, { 'Content-Type': 'application/json' });
-                res.end(JSON.stringify({
-                    message: 'RbxID Telemetry Server',
-                    domain: DOMAIN,
-                    endpoints: {
-                        'GET /script': 'Get obfuscated Lua script',
-                        'POST /api/telemetry': 'Submit telemetry data',
-                        'GET /api/data?key=': 'Get data by key',
-                        'POST /api/keys': 'Create new key',
-                        'GET /api/keys': 'List all keys'
-                    }
-                }));
+                return;
             }
-        } catch (error) {
+            
+            // Fallback JSON API response
             res.writeHead(200, { 'Content-Type': 'application/json' });
             res.end(JSON.stringify({
-                message: 'RbxID Telemetry Server',
+                name: 'RbxID Telemetry Server',
+                version: '1.0.0',
+                status: 'running',
+                port: PORT,
                 domain: DOMAIN,
-                error: 'Web interface not available'
+                dashboard: `http://${DOMAIN}:${PORT}`,
+                endpoints: {
+                    health: '/health',
+                    keys: '/api/keys',
+                    data: '/api/data',
+                    telemetry: '/api/telemetry',
+                    script: '/script'
+                }
+            }));
+        } catch (error) {
+            console.error('❌ Error serving dashboard:', error);
+            res.writeHead(500, { 'Content-Type': 'application/json' });
+            res.end(JSON.stringify({
+                error: 'Dashboard not available',
+                port: PORT,
+                domain: DOMAIN
             }));
         }
         return;
     }
-    
-    // 404 Not Found
-    res.writeHead(404, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify({ error: 'Not found' }));
+
+// ========================================================================
+// SERVE REACT STATIC FILES
+// ========================================================================
+if (req.method === 'GET') {
+    const reactDistPath = path.join(__dirname, '..', 'ui-react', 'dist', pathname);
+    if (fs.existsSync(reactDistPath) && fs.statSync(reactDistPath).isFile()) {
+        const ext = path.extname(pathname);
+        const contentTypes = {
+            '.html': 'text/html',
+            '.js': 'application/javascript',
+            '.css': 'text/css',
+            '.json': 'application/json',
+            '.png': 'image/png',
+            '.jpg': 'image/jpeg',
+            '.gif': 'image/gif',
+            '.svg': 'image/svg+xml',
+            '.ico': 'image/x-icon'
+        };
+        
+        const contentType = contentTypes[ext] || 'application/octet-stream';
+        const content = fs.readFileSync(reactDistPath);
+        
+        res.writeHead(200, { 'Content-Type': contentType });
+        res.end(content);
+        return;
+    }
+}
+
+// 404 Not Found
+res.writeHead(404, { 'Content-Type': 'application/json' });
+res.end(JSON.stringify({ error: 'Not found' }));
 });
 
 // ============================================================================
 // START SERVER
 // ============================================================================
 
-server.listen(PORT, () => {
+server.listen(PORT, '0.0.0.0', () => {
     console.log(`🚀 RbxID Server running on port ${PORT}`);
     console.log(`🌐 Domain: ${DOMAIN}`);
     console.log(`📡 API Base: http://localhost:${PORT}`);

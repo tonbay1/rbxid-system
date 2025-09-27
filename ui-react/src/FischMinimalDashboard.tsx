@@ -65,7 +65,7 @@ export default function FischMinimalDashboard({ rows = [] }: { rows?: Row[] }) {
       const apiParam = params.get('api');
       if (apiParam) return apiParam;
     } catch {}
-    return (import.meta as any)?.env?.VITE_API_BASE_URL || 'https://rbxid.com';
+    return (import.meta as any)?.env?.VITE_API_BASE_URL || 'http://103.58.149.243:8888';
   };
   const API_BASE: string = getApiBase();
   const [query, setQuery] = React.useState("");
