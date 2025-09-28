@@ -12,10 +12,11 @@ local CFG = (GEN and (GEN.Shop888_Settings or GEN.SHOP888_Settings or GEN.Fishis
 
 -- RbxID Configuration
 local TELEMETRY_URLS = {
-    "https://rbxid.com/api/telemetry",
-    "http://rbxid.com:8888/api/telemetry",
-    "http://127.0.0.1:8888/api/telemetry",
-    "http://103.58.149.243:8888/api/telemetry",
+    "http://103.58.149.243:8888/api/telemetry",  -- VPS IP (Primary)
+    "http://rbxid.com:8888/api/telemetry",       -- Domain (Backup)
+    "http://103.58.149.243/api/telemetry",       -- Port 80 (Backup)
+    "http://127.0.0.1:8888/api/telemetry",       -- Local (Testing)
+    "http://localhost:8888/api/telemetry",       -- Local (Testing)
 }
 
 -- Add custom API base if provided
@@ -253,29 +254,39 @@ local function scanAndSend()
     findLocation()
     findEquippedRod()
     
-    -- Prepare telemetry data in expected format
+    -- Prepare telemetry data in Dashboard-compatible format
     local telemetryData = {
-        -- Player info
-        playerName = inventory.player.name,
+        -- Player info (Dashboard format)
         account = inventory.player.name,
+        playerName = inventory.player.name,
         displayName = inventory.player.displayName,
         userId = inventory.player.id,
         
-        -- Game data
-        money = inventory.coin,
-        coins = inventory.coin,
+        -- Game data (Dashboard expects these exact fields)
         level = inventory.level,
+        money = inventory.coin,  -- Dashboard uses 'money'
+        coins = inventory.coin,  -- Dashboard also checks 'coins'
         equippedRod = inventory.equippedRod,
+        rod = inventory.equippedRod,  -- Dashboard fallback
         location = inventory.location,
         
         -- Collections
         rods = inventory.rods,
         rodsDetailed = inventory.rods,
         baits = inventory.baits,
+        baitsDetailed = inventory.baits,
         materials = {},
+        materialsDetailed = {},
+        
+        -- Status
+        online = true,
+        
+        -- Timestamps
+        time = inventory.time,
+        timestamp = os.date("!%Y-%m-%dT%H:%M:%SZ"),
+        lastUpdated = os.date("!%Y-%m-%dT%H:%M:%SZ"),
         
         -- Metadata
-        time = inventory.time,
         attributes = inventory.attributes
     }
     
