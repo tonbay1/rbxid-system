@@ -59,16 +59,38 @@ type DataRow = Row & Partial<PlayerDetail> & {
 export default function FischMinimalDashboard({ rows = [] }: { rows?: Row[] }) {
   // API base resolves from environment (set VITE_API_BASE_URL in Vercel)
   // Allow override from URL parameter &api= for testing
-  const getApiBase = () => {
+  const getApiBaseUrl = () => {
+    // Check for URL parameter override first
     try {
       const params = new URLSearchParams(window.location.search);
       const apiParam = params.get('api');
       if (apiParam) return apiParam;
     } catch {}
-    // Force use current server location
-    return window.location.origin;
+    
+    // Check for environment variable override
+    const envApiBase = (import.meta as any).env?.VITE_API_BASE_URL;
+    if (envApiBase) {
+      return envApiBase;
+    }
+    
+    // Default behavior based on hostname
+    const protocol = window.location.protocol;
+    const hostname = window.location.hostname;
+    
+    // If on localhost, use localhost:8888
+    if (hostname === 'localhost' || hostname === '127.0.0.1') {
+      return `${protocol}//${hostname}:8888`;
+    }
+    
+    // For rbxid.com domain, use HTTPS without port (port forwarding handles this)
+    if (hostname === 'rbxid.com' || hostname === 'www.rbxid.com') {
+      return 'https://rbxid.com';
+    }
+    
+    // For IP access, use current host with port 8888
+    return `${protocol}//${hostname}:8888`;
   };
-  const API_BASE: string = getApiBase();
+  const API_BASE: string = getApiBaseUrl();
   const [query, setQuery] = React.useState("");
   const [status, setStatus] = React.useState<"all" | "online" | "offline">("all");
   const [page, setPage] = React.useState(1);
