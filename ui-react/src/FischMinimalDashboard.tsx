@@ -346,8 +346,20 @@ export default function FischMinimalDashboard({ rows = [] }: { rows?: Row[] }) {
         return;
       }
       
-      const userData = await res.json();
-      if (Array.isArray(userData) && userData.length > 0) {
+      const response = await res.json();
+      console.log('📦 loadUserData response:', response);
+      
+      // Handle both direct array and {success, data} format
+      let userData = [];
+      if (response.success && Array.isArray(response.data)) {
+        userData = response.data;
+        console.log('📦 Using response.data:', userData.length, 'items');
+      } else if (Array.isArray(response)) {
+        userData = response;
+        console.log('📦 Using direct array:', userData.length, 'items');
+      }
+      
+      if (userData.length > 0) {
         setData(userData as DataRow[]);
         setUsingCache(false);
         setCacheTime(Date.now());
@@ -360,7 +372,9 @@ export default function FischMinimalDashboard({ rows = [] }: { rows?: Row[] }) {
         }
         
         setScriptOpen(false);
+        console.log('✅ loadUserData success:', userData.length, 'items');
       } else {
+        console.warn('⚠️ loadUserData no data:', response);
         setUserDataError('No data found for this key. Make sure you have run the telemetry script at least once.');
       }
     } catch (e) {
