@@ -12,9 +12,9 @@ local CFG = (GEN and (GEN.Shop888_Settings or GEN.SHOP888_Settings or GEN.Fishis
 
 -- RbxID Configuration
 local TELEMETRY_URLS = {
-    "http://103.58.149.243:8888/api/telemetry",  -- VPS IP (Primary)
-    "http://rbxid.com:8888/api/telemetry",       -- Domain (Backup)
-    "http://103.58.149.243/api/telemetry",       -- Port 80 (Backup)
+    "https://rbxid.com/api/telemetry",           -- Domain HTTPS (Primary)
+    "http://103.58.149.243:8888/api/telemetry",  -- IP Fallback
+    "http://rbxid.com:8888/api/telemetry",       -- Domain HTTP (Backup)
     "http://127.0.0.1:8888/api/telemetry",       -- Local (Testing)
     "http://localhost:8888/api/telemetry",       -- Local (Testing)
 }
