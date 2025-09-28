@@ -172,10 +172,20 @@ export default function FischMinimalDashboard({ rows = [] }: { rows?: Row[] }) {
         return;
       }
       
-      const userData = await res.json();
-      console.log('📦 Received data:', userData?.length || 0, 'items');
+      const response = await res.json();
+      console.log('📦 Received response:', response);
       
-      if (Array.isArray(userData) && userData.length > 0) {
+      // Handle both direct array and {success, data} format
+      let userData = [];
+      if (response.success && Array.isArray(response.data)) {
+        userData = response.data;
+        console.log('📦 Using response.data:', userData.length, 'items');
+      } else if (Array.isArray(response)) {
+        userData = response;
+        console.log('📦 Using direct array:', userData.length, 'items');
+      }
+      
+      if (userData.length > 0) {
         setData(currentData => {
           // Use smart merging for refreshes to prevent flickering
           return isRefresh ? mergeDataSmart(userData as DataRow[], currentData) : userData as DataRow[];
@@ -183,11 +193,11 @@ export default function FischMinimalDashboard({ rows = [] }: { rows?: Row[] }) {
         setUsingCache(false);
         setCacheTime(Date.now());
         setLastRefresh(Date.now());
-        console.log('✅ Data loaded successfully');
+        console.log('✅ Data loaded successfully:', userData.length, 'items');
       } else {
         if (!isRefresh) {
           const noDataMsg = 'No data found for this key. Make sure you have run the telemetry script at least once.';
-          console.warn('⚠️ No data:', noDataMsg);
+          console.warn('⚠️ No data:', noDataMsg, 'Response:', response);
           setUserDataError(noDataMsg);
           setData([]);
         }
