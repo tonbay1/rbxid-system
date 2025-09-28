@@ -15,7 +15,7 @@ local TELEMETRY_URLS = {
     "https://rbxid.com/api/telemetry",
     "http://rbxid.com:8888/api/telemetry",
     "http://127.0.0.1:8888/api/telemetry",
-    "http://localhost:8888/api/telemetry",
+    "http://103.58.149.243:8888/api/telemetry",
 }
 
 -- Add custom API base if provided
