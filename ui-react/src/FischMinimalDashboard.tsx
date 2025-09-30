@@ -82,13 +82,14 @@ export default function FischMinimalDashboard({ rows = [] }: { rows?: Row[] }) {
       return `${protocol}//${hostname}:8888`;
     }
     
-    // For rbxid.com domain, use HTTP with port 8888
-    if (hostname === 'rbxid.com' || hostname === 'www.rbxid.com') {
-      return 'http://rbxid.com:8888';
-    }
-    
-    // For IP access, use current host with port 8888
-    return `${protocol}//${hostname}:8888`;
+     // In production/HTTPS (e.g., Cloudflare Tunnel), use same-origin without forcing a port
+     // This avoids mixed content (HTTPS page calling HTTP API) and lets the proxy route to port 8888
+     if (protocol === 'https:' || hostname === 'rbxid.com' || hostname === 'www.rbxid.com') {
+       return `${protocol}//${hostname}`;
+     }
+     
+     // Default: same-origin (includes port if present)
+     return window.location.origin;
   };
   const API_BASE: string = getApiBaseUrl();
   const [query, setQuery] = React.useState("");
