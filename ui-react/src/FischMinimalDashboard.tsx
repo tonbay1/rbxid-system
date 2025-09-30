@@ -82,9 +82,9 @@ export default function FischMinimalDashboard({ rows = [] }: { rows?: Row[] }) {
       return `${protocol}//${hostname}:8888`;
     }
     
-    // For rbxid.com domain, use HTTPS without port (port forwarding handles this)
+    // For rbxid.com domain, use HTTP without port (port forwarding handles this)
     if (hostname === 'rbxid.com' || hostname === 'www.rbxid.com') {
-      return 'https://rbxid.com';
+      return 'http://rbxid.com';
     }
     
     // For IP access, use current host with port 8888
@@ -1212,7 +1212,7 @@ export default function FischMinimalDashboard({ rows = [] }: { rows?: Row[] }) {
                       )}
                       <TableCell className="account-cell">{r.account}</TableCell>
                       <TableCell className="cell text-xs text-muted-foreground">
-                        {(r as any).attributes?.machine || 'Unknown-PC'}
+                        {(r as any).pcName || (r as any).PC || (r as any).attributes?.machine || 'Unknown-PC'}
                       </TableCell>
                       <TableCell className="cell">{nf.format((r as any).coins ?? (r as any).money ?? 0)}</TableCell>
                       <TableCell className="cell">{r.level ?? 0}</TableCell>
