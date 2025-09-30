@@ -82,9 +82,9 @@ export default function FischMinimalDashboard({ rows = [] }: { rows?: Row[] }) {
       return `${protocol}//${hostname}:8888`;
     }
     
-    // For rbxid.com domain, use HTTP without port (port forwarding handles this)
+    // For rbxid.com domain, use HTTP with port 8888
     if (hostname === 'rbxid.com' || hostname === 'www.rbxid.com') {
-      return 'http://rbxid.com';
+      return 'http://rbxid.com:8888';
     }
     
     // For IP access, use current host with port 8888
