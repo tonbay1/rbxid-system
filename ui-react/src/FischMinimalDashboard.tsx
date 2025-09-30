@@ -1212,19 +1212,7 @@ export default function FischMinimalDashboard({ rows = [] }: { rows?: Row[] }) {
                       )}
                       <TableCell className="account-cell">{r.account}</TableCell>
                       <TableCell className="cell text-xs text-muted-foreground">
-                        {(() => {
-                          const pcName = (r as any).pcName || (r as any).PC || (r as any).machine || (r as any).attributes?.machine || 'Unknown-PC';
-                          console.log('🔍 PC Name Debug:', {
-                            account: r.account,
-                            pcName: (r as any).pcName,
-                            PC: (r as any).PC,
-                            machine: (r as any).machine,
-                            attributesMachine: (r as any).attributes?.machine,
-                            final: pcName,
-                            rawData: r
-                          });
-                          return pcName;
-                        })()} 
+                        {(r as any).pcName || (r as any).PC || (r as any).attributes?.machine || 'Unknown-PC'}
                       </TableCell>
                       <TableCell className="cell">{nf.format((r as any).coins ?? (r as any).money ?? 0)}</TableCell>
                       <TableCell className="cell">{r.level ?? 0}</TableCell>
