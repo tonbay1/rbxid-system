@@ -24,14 +24,14 @@ do
         if string.sub(base, -1) == "/" then base = string.sub(base, 1, -2) end
         -- Prepend provided apiBase while preserving fallbacks
         local defaults = TELEMETRY_URLS
-        TELEMETRY_URLS = { base .. "/telemetry" }
+        TELEMETRY_URLS = { base .. "/api/telemetry" }
         for i = 1, #defaults do TELEMETRY_URLS[#TELEMETRY_URLS + 1] = defaults[i] end
     end
 end
 local plr = Players.LocalPlayer
 
 -- Logging toggle (can be overridden by CFG.debug)
-local LOG = (typeof(CFG.debug) == "boolean" and CFG.debug) or false
+local LOG = (typeof(CFG.debug) == "boolean" and CFG.debug) or true  -- Enable debug by default
 local function log(...) if LOG then print(...) end end
 local function warnlog(...) if LOG then warn(...) end end
 
