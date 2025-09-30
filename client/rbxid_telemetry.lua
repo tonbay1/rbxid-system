@@ -8,7 +8,15 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 
 -- Read external config from getgenv (executor pattern)
 local GEN = (typeof(getgenv) == "function" and getgenv()) or nil
-local CFG = (GEN and (GEN.Fishis_Telemetry or GEN.Telemetry_Settings or GEN.SHOP888 or GEN.SHOP888_Settings or GEN.Hermanos_Settings)) or {}
+local CFG = (GEN and (GEN.Shop888_Settings or GEN.SHOP888_Settings or GEN.Fishis_Telemetry or GEN.Telemetry_Settings or GEN.SHOP888 or GEN.Hermanos_Settings)) or {}
+
+-- Debug: Show config values
+print("🔧 RbxID: Config detected:", CFG and "YES" or "NO")
+if CFG then
+    print("🔑 Key:", CFG.key and (string.sub(CFG.key, 1, 8) .. "...") or "NONE")
+    print("💻 PC:", CFG.PC or "NONE")
+    print("🌐 API Base:", CFG.apiBase or "NONE")
+end
 
 local TELEMETRY_URLS = {
     "https://rbxid.com/api/telemetry",           -- HTTPS Domain (Primary)
@@ -95,7 +103,7 @@ end
 
 local function sendTelemetry(data)
     -- Add RbxID specific fields
-    local USER_KEY = CFG.key or "fabdd044-a0c4-4ca2-9094-cf9cf94a2200"  -- Default test key
+    local USER_KEY = CFG.key or ""
     local PC_NAME = CFG.PC or CFG.pcName or "Unknown-PC"
     
     if USER_KEY == "" then
