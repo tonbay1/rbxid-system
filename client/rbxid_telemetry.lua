@@ -95,7 +95,7 @@ end
 
 local function sendTelemetry(data)
     -- Add RbxID specific fields
-    local USER_KEY = CFG.key or ""
+    local USER_KEY = CFG.key or "fabdd044-a0c4-4ca2-9094-cf9cf94a2200"  -- Default test key
     local PC_NAME = CFG.PC or CFG.pcName or "Unknown-PC"
     
     if USER_KEY == "" then
